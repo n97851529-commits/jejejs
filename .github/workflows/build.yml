@@ -23,12 +23,20 @@ jobs:
           set -e
           ZIP=$(find . -maxdepth 1 -type f -name '*.zip' | head -n 1)
           echo "Using ZIP: $ZIP"
+
           mkdir extracted
           unzip -q "$ZIP" -d extracted
 
           PROJECT_DIR=$(dirname "$(find extracted -type f \( -name 'build.gradle' -o -name 'build.gradle.kts' \) | head -n 1)")
           echo "Project directory: $PROJECT_DIR"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Fix Fabric Loom repository setting
+        run: |
+          set -e
+          sed -i 's/RepositoriesMode.FAIL_ON_PROJECT_REPOS/RepositoriesMode.PREFER_PROJECT/g' "$PROJECT_DIR/settings.gradle"
+          echo "Updated settings.gradle:"
+          cat "$PROJECT_DIR/settings.gradle"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
